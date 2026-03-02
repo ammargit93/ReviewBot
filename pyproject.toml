@@ -13,6 +13,7 @@ dependencies = [
     "requests>=2.32.5",
     "sentence-transformers>=5.2.3",
     "tortoise-orm>=1.1.5",
+    "tzdata>=2025.3",
     "uvicorn>=0.41.0",
     "watchdog>=6.0.0",
 ]

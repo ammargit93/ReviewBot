@@ -6,7 +6,7 @@ from reviewbot.cli import build_parser
 async def init_db():
     os.makedirs(DB_DIR, exist_ok=True)
     from .models import File  # import models before init
-    await Tortoise.init(db_url=f"sqlite://{DB_PATH}", modules={"models": ["reviewbot.models"]})
+    await Tortoise.init(db_url=f"sqlite://{DB_PATH}", modules={"models": ["reviewbot.models"]},timezone="UTC")
     await Tortoise.generate_schemas()
 
 async def main():

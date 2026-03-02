@@ -5,11 +5,11 @@ from langchain_chroma import Chroma
 import requests
 import time
 
-from reviewbot.models import File
+from reviewbot.models import File, Conversation
 from reviewbot.indexing.chunking import document_splitter
 from reviewbot.config import COLLECTION, CHROMA_PATH, EMBEDDING_MODEL
 from reviewbot.utils import resolve_files
-
+from reviewbot.agents.auth import create_conversation_command
 
 IGNORE_DIRS = {".git", ".venv", "__pycache__", ".reviewbot", "node_modules"}
 
@@ -20,7 +20,15 @@ async def index_files(args):
     if not all_files:
         print("No files to index")
         return
+    
+    convo_name = args.name
+    if not convo_name:
+        convo_name = input("Conversation name: ").strip()
 
+    convo, _ = await Conversation.get_or_create(
+        conversation_name=convo_name
+    )
+    
     vector_store = Chroma(
         collection_name=COLLECTION,
         persist_directory=str(CHROMA_PATH),
@@ -42,7 +50,7 @@ async def index_files(args):
         documents.append(Document(page_content=content, metadata={"path": str(filepath)}, id=file_id))
         uuids.append(file_id)
 
-        await File.create(file_path=str(filepath), file_hash=filehash, file_embed_id=file_id)
+        await File.create(convo=convo, file_path=str(filepath), file_hash=filehash, file_embed_id=file_id)
         print(f"Indexed: {filepath}")
 
     if documents:
