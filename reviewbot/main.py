@@ -1,7 +1,7 @@
 import os
 from tortoise import Tortoise
-from .config import DB_DIR, DB_PATH
-from .cli import build_parser
+from reviewbot.config import DB_DIR, DB_PATH
+from reviewbot.cli import build_parser
 
 async def init_db():
     os.makedirs(DB_DIR, exist_ok=True)
