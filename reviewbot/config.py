@@ -21,6 +21,8 @@ COLLECTION = BASE_DIR.name
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CHROMA_PATH.mkdir(parents=True, exist_ok=True)
 DB_DIR.mkdir(parents=True, exist_ok=True)
+# print(COLLECTION)
+# print(CHROMA_PATH)
 
 # Embedding model
 EMBEDDING_MODEL = HuggingFaceEmbeddings(

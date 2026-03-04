@@ -1,0 +1,69 @@
+from langchain_openrouter import ChatOpenRouter
+from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain.agents import create_agent
+from langchain.tools import tool
+from dotenv import load_dotenv
+import os
+
+from .prompt import SYSTEM_PROMPT
+
+load_dotenv()
+
+model = ChatOpenRouter(
+    model="google/gemini-2.5-flash",
+    temperature=0,
+    max_tokens=1024,
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
+memory = InMemorySaver()
+
+
+def build_retriever_tool(vector_store):
+
+    @tool
+    def search_codebase(query: str) -> str:
+        """Search the indexed codebase for relevant snippets."""
+        results = vector_store.similarity_search_with_score(query, k=5)
+
+        formatted = []
+        for doc, score in results:
+            formatted.append(
+                f"File: {doc.metadata.get('path')}\n"
+                f"Score: {score}\n"
+                f"Content:\n{doc.page_content}\n"
+            )
+
+        return "\n\n".join(formatted)
+
+    return search_codebase
+
+
+def create_rag_agent(vector_store):
+    retriever_tool = build_retriever_tool(vector_store)
+
+    agent = create_agent(
+        model=model,
+        checkpointer=memory,
+        tools=[retriever_tool],
+        system_prompt=SYSTEM_PROMPT
+    )
+
+    return agent
+
+
+async def generate_ai_response(agent, user_input: str, thread_id: str) -> str:
+
+    config = {
+        "configurable": {
+            "thread_id": thread_id
+        }
+    }
+
+    response = agent.invoke(
+        {"messages": [HumanMessage(content=user_input)]},
+        config=config
+    )
+
+    return response["messages"][-1].content
