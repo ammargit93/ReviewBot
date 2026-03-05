@@ -1,9 +1,7 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter
 from server.models import Session
 
 router = APIRouter()
-
-
 
 @router.get("/session/list")
 async def list_sessions():

@@ -1,14 +1,18 @@
 from langchain_openrouter import ChatOpenRouter
 from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain.agents import create_agent
 from langchain.tools import tool
 from dotenv import load_dotenv
+from tavily import TavilyClient
+import sqlite3
+import re
 import os
 
 from .prompt import SYSTEM_PROMPT
 
 load_dotenv()
+client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
 model = ChatOpenRouter(
     model="google/gemini-2.5-flash",
@@ -16,15 +20,27 @@ model = ChatOpenRouter(
     max_tokens=1024,
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
+conn = sqlite3.connect(
+    r"C:\Projects\Python-projects\ReviewBot\.reviewbot\database\memory.db",
+    check_same_thread=False
+)
 
-memory = InMemorySaver()
+memory = SqliteSaver(conn=conn)
 
-import re
+
+@tool
+def search_web(query: str):
+    """This tool performs a web search with the given query."""
+    return client.search(query)
+
 
 def build_retriever_tool(vector_store):
     @tool
     def search_codebase(query: str) -> str:
-        """Search the indexed codebase for relevant snippets."""
+        """
+        Search the indexed codebase for relevant code snippets and files. 
+        Always use this tool when the user asks about repository code.
+        """
         match = re.search(r"\b[\w\-]+\.py\b", query)
         if match:
             filename = match.group(0)
@@ -52,7 +68,7 @@ def create_rag_agent(vector_store):
     agent = create_agent(
         model=model,
         checkpointer=memory,
-        tools=[retriever_tool],
+        tools=[retriever_tool, search_web],
         system_prompt=SYSTEM_PROMPT
     )
 
