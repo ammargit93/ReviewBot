@@ -1,13 +1,5 @@
-import hashlib
-from uuid import uuid4
-from langchain_core.documents import Document
-from langchain_chroma import Chroma
 import requests
 import time
-
-from reviewbot.models import File, Session
-from reviewbot.indexing.chunking import document_splitter
-from reviewbot.config import COLLECTION, CHROMA_PATH, EMBEDDING_MODEL
 from reviewbot.utils import resolve_files
 
 IGNORE_DIRS = {".git", ".venv", "__pycache__", ".reviewbot", "node_modules"}

@@ -1,21 +1,18 @@
 from fastapi import FastAPI, Request, HTTPException
 from contextlib import asynccontextmanager
 from langchain_chroma import Chroma
-from langchain_core.documents import Document
 from tortoise.contrib.fastapi import register_tortoise
 
-from pathlib import Path
-import hashlib
-from uuid import uuid4
-import time
 
 from reviewbot.config import COLLECTION, CHROMA_PATH, EMBEDDING_MODEL, DB_PATH
 from .agents.llm import create_rag_agent, generate_ai_response
-from .models import Session, File
-from .utils import document_splitter
+
+from fastapi import HTTPException
+from .services.indexer import run_indexing
+from .services.sessions import router as session_router
+from .models import Session, Message
 
 
-# ------------------ LIFESPAN ------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,21 +36,17 @@ async def lifespan(app: FastAPI):
     print("Shutting down ReviewBot server")
 
 
-# ------------------ APP INIT ------------------
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(session_router)
 
-# 🔥 REGISTER TORTOISE AFTER APP CREATION
 register_tortoise(
     app,
     db_url=f"sqlite://{DB_PATH}",
-    modules={"models": ["server.models"]},  # ⚠️ FIX THIS IF NEEDED
+    modules={"models": ["server.models"]}, 
     generate_schemas=True,
     add_exception_handlers=True,
 )
-
-
-# ------------------ CHAT ------------------
 
 @app.post("/chat")
 async def chat_endpoint(request: Request):
@@ -68,18 +61,34 @@ async def chat_endpoint(request: Request):
     if not thread_id:
         raise HTTPException(status_code=400, detail="thread_id is required")
 
+    session, _ = await Session.get_or_create(session_name=thread_id)
+
+    # store user message
+    await Message.create(
+        session=session,
+        message_content=message,
+        message_type="HumanMessage"
+    )
+
     response = await generate_ai_response(
         agent=request.app.state.agent,
         user_input=message,
         thread_id=thread_id,
     )
 
-    return {"response": response}
+    # store AI message
+    await Message.create(
+        session=session,
+        message_content=response,
+        message_type="AIMessage"
+    )
 
+    session.message_count += 2
+    await session.save()
 
-# ------------------ INDEX ------------------
-from fastapi import HTTPException
-from .services.indexer import run_indexing
+    return {
+        "response": response
+    }
 
 
 @app.post("/index")

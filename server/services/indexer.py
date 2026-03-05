@@ -3,8 +3,6 @@ import time
 from pathlib import Path
 from uuid import uuid4
 
-from langchain_core.documents import Document
-
 from server.models import File, Session
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -13,7 +11,7 @@ from uuid import uuid4
 from typing import List
 
 def document_splitter(documents: List[Document]):
-    splitter = RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=0)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
     chunks = splitter.split_documents(documents)
     uuids = []
     new_docs = []
