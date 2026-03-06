@@ -4,7 +4,6 @@ from reviewbot.config import IGNORE_DIRS
 
 def should_ignore(path: Path):
     return any(part in IGNORE_DIRS for part in path.parts)
-from pathlib import Path
 
 def resolve_files(args):
     all_files = []

@@ -18,7 +18,7 @@ async def list_sessions_command(args):
     for s in sessions:
         print(f"- {s['session_name']} (messages: {s['message_count']})")
     
-    
+
 async def chat_command(args):
     if not args or not args.name:
         print("Use --name to specify a session")
