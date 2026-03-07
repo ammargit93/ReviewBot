@@ -80,6 +80,7 @@ reviewbot chat --name <session-name> # starts a interactive terminal chat.
 
 ### After Concurrency
 <img src="assets/benchmarks/after_concurrency.png" width="700">
+
 <!-- ## Next steps
 - avoid embedding recomputation on re-indexing of changed file(check with hashes).
 - diff management(only embed file diffs).
