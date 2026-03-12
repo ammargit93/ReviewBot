@@ -22,27 +22,20 @@ async def process_file(path_str, session, semaphore):
  
         filehash = hashlib.sha1(content.encode("utf-8")).hexdigest()
 
-        existing = await File.filter(
-            session=session,
-            file_hash=filehash
-        ).first()
-
+        existing = await File.filter(session=session,file_hash=filehash).first()
         if existing:
             return None
 
         file_id = str(uuid4())
-
         document = Document(
             page_content=content,
-            metadata={"path": str(filepath)},
+            metadata={
+                "path": str(filepath),
+                "session":session.session_name
+            },
             id=file_id
         )
-
-        file_data = {
-            "file_path": str(filepath),
-            "file_hash": filehash,
-            "file_embed_id": file_id
-        }
+        file_data = {"file_path": str(filepath),"file_hash": filehash, "file_embed_id": file_id}
 
         return document, file_data
 

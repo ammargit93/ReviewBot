@@ -18,7 +18,6 @@ async def index_files(args):
         session_name = input("Session name: ").strip()
 
     file_paths = [str(p) for p in all_files]
-
     try:
         response = requests.post(
             "http://127.0.0.1:8000/index",

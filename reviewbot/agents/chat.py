@@ -24,6 +24,9 @@ async def chat_command(args):
         print("Use --name to specify a session")
         return
     session_name = args.name
+    if args.multi_agent:
+        pass
+    
     print(f"\nSession: {session_name}")
     async with httpx.AsyncClient(timeout=30.0) as client:
         while True:
