@@ -9,7 +9,9 @@ import sqlite3
 import re
 import os
 
+
 from .prompt import SYSTEM_PROMPT
+from .tools import build_retriever_tool, search_web
 
 load_dotenv()
 
@@ -29,61 +31,10 @@ conn = sqlite3.connect(
 
 memory = SqliteSaver(conn=conn)
 
-
-@tool
-def search_web(query: str):
-    """Search the web for information."""
-    return client.search(query)
-
-
-def build_retriever_tool(vector_store):
-
-    @tool
-    def search_codebase(query: str) -> str:
-        """
-        Search the indexed codebase for relevant code snippets or files.
-        Works across any programming language.
-        """
-
-        # detect any filename with extension
-        match = re.search(r"\b[\w\-/]+\.[a-zA-Z0-9]+\b", query)
-
-        if match:
-            filename = match.group(0)
-
-            docs = vector_store.get(
-                where={"path": {"$contains": filename}}
-            )
-
-            if docs and docs["documents"]:
-                content = "\n\n".join(docs["documents"])
-
-                return (
-                    f"### Full file: {filename}\n"
-                    f"```\n{content}\n```"
-                )
-
-        # semantic search fallback
-        results = vector_store.similarity_search_with_score(query, k=5)
-
-        formatted = []
-
-        for doc, score in results:
-            formatted.append(
-                f"### File: {doc.metadata.get('path')}\n"
-                f"Score: {score}\n"
-                f"```\n{doc.page_content}\n```"
-            )
-
-        return "\n\n".join(formatted)
-
-    return search_codebase
-
-
 def create_rag_agent(vector_store):
 
     retriever_tool = build_retriever_tool(vector_store)
-
+    
     agent = create_agent(
         model=model,
         checkpointer=memory,
