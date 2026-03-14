@@ -3,6 +3,7 @@ from tavily import TavilyClient
 import re
 import os 
 from dotenv import load_dotenv
+from server.container import ContainerManager
 
 load_dotenv()
 client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
@@ -14,17 +15,13 @@ def search_web(query: str):
 
 
 def build_retriever_tool(vector_store):
-
     @tool
     def search_codebase(query: str) -> str:
         """
         Search the indexed codebase for relevant code snippets or files.
         Works across any programming language.
         """
-
-        # detect any filename with extension
         match = re.search(r"[\w./\\-]+\.[a-zA-Z0-9]+", query)
-        
         if match:
             filename = match.group(0)
 
@@ -33,15 +30,14 @@ def build_retriever_tool(vector_store):
             )
 
             if docs and docs["documents"]:
-                content = "\n\n".join(docs["documents"])
+                content = "\n\n".join(docs["documents"][:2])
 
                 return (
                     f"### Full file: {filename}\n"
                     f"```\n{content}\n```"
                 )
 
-        # semantic search fallback
-        results = vector_store.similarity_search_with_score(query, k=5)
+        results = vector_store.similarity_search_with_score(query, k=3)
 
         formatted = []
 
@@ -56,3 +52,13 @@ def build_retriever_tool(vector_store):
 
     return search_codebase
 
+
+@tool
+def spawn_container(prompt: str):
+    """
+    Start a temporary Docker container for sandboxed code execution.
+    Returns the container ID.
+    """
+    manager = ContainerManager()
+    container = manager.start_container()
+    return {"container_id": container.id}

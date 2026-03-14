@@ -10,6 +10,9 @@ DATA_DIR = BASE_DIR / ".reviewbot"
 # Vector store directory
 CHROMA_PATH = DATA_DIR / "embeddings"
 
+# snapshots
+SNAPSHOT_PATH = DATA_DIR / "snapshots"
+
 # SQLite database
 DB_DIR = DATA_DIR / "database"
 DB_PATH = DB_DIR / "reviewbot.db"
@@ -21,8 +24,7 @@ COLLECTION = BASE_DIR.name
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CHROMA_PATH.mkdir(parents=True, exist_ok=True)
 DB_DIR.mkdir(parents=True, exist_ok=True)
-# print(COLLECTION)
-# print(CHROMA_PATH)
+SNAPSHOT_PATH.mkdir(parents=True, exist_ok=True)
 
 # Embedding model
 EMBEDDING_MODEL = HuggingFaceEmbeddings(

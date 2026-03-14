@@ -11,7 +11,7 @@ import os
 
 
 from .prompt import SYSTEM_PROMPT
-from .tools import build_retriever_tool, search_web
+from .tools import build_retriever_tool, search_web, spawn_container
 
 load_dotenv()
 
@@ -20,7 +20,7 @@ client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 model = ChatOpenRouter(
     model="google/gemini-2.5-flash",
     temperature=0,
-    max_tokens=1024,
+    max_tokens=256,
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
@@ -38,7 +38,7 @@ def create_rag_agent(vector_store):
     agent = create_agent(
         model=model,
         checkpointer=memory,
-        tools=[retriever_tool, search_web],
+        tools=[retriever_tool, search_web, spawn_container],
         system_prompt=SYSTEM_PROMPT
     )
 
