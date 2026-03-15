@@ -43,8 +43,7 @@ def document_splitter(documents: List[Document]):
                 },
                 id=chunk_id
             )
-        )
-
+        )        
         ids.append(chunk_id)
 
     return new_docs, ids

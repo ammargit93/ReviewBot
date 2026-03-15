@@ -38,4 +38,7 @@ IGNORE_DIRS = {
     "__pycache__",
     ".reviewbot",
     "node_modules",
+    "assets",
+    ".python-version",
+    "uv.lock"
 }

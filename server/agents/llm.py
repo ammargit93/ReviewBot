@@ -1,8 +1,7 @@
-from langchain_openrouter import ChatOpenRouter
+from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain.agents import create_agent
-from langchain.tools import tool
 from dotenv import load_dotenv
 from tavily import TavilyClient
 import sqlite3
@@ -17,11 +16,11 @@ load_dotenv()
 
 client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
-model = ChatOpenRouter(
-    model="google/gemini-2.5-flash",
+model = ChatGroq(
+    model="llama-3.1-8b-instant",
     temperature=0,
-    max_tokens=256,
-    api_key=os.getenv("OPENROUTER_API_KEY"),
+    max_tokens=1024,
+    api_key=os.getenv("GROQ_API_KEY"),
 )
 
 conn = sqlite3.connect(
@@ -32,16 +31,13 @@ conn = sqlite3.connect(
 memory = SqliteSaver(conn=conn)
 
 def create_rag_agent(vector_store):
-
     retriever_tool = build_retriever_tool(vector_store)
-    
     agent = create_agent(
         model=model,
         checkpointer=memory,
         tools=[retriever_tool, search_web, spawn_container],
         system_prompt=SYSTEM_PROMPT
     )
-
     return agent
 
 
