@@ -24,8 +24,10 @@ async def chat_command(args):
         print("Use --name to specify a session")
         return
     session_name = args.name
-    if args.multi_agent:
-        pass
+    multi_agent = getattr(args, "multi_agent", False)
+    
+    if multi_agent:
+        print(f"\n[Multi-Agent Mode Enabled]")
     
     print(f"\nSession: {session_name}")
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -37,7 +39,8 @@ async def chat_command(args):
                 f"{API_URL}/chat",
                 json={
                     "message": user_input,
-                    "thread_id": session_name
+                    "thread_id": session_name,
+                    "multi_agent": bool(multi_agent)
                 }
             )
             response.raise_for_status()

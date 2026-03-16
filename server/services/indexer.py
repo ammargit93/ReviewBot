@@ -8,6 +8,7 @@ from langchain_core.documents import Document
 from server.models import File, Session
 from .utils import document_splitter
 
+
 async def process_file(path_str, session, semaphore):
     async with semaphore:
         filepath = Path(path_str)

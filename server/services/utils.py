@@ -7,8 +7,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1200,
-    chunk_overlap=500,
+    chunk_size=500,
+    chunk_overlap=300,
     separators=[
         "\n\n",     # logical blocks
         "\n",       # lines

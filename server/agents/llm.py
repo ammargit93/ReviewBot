@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langchain.agents.middleware import SummarizationMiddleware
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 from tavily import TavilyClient
@@ -54,4 +55,7 @@ async def generate_ai_response(agent, user_input: str, thread_id: str) -> str:
         config=config
     )
 
-    return response["messages"][-1].content
+    if response["messages"][-1].content:
+        return response["messages"][-1].content
+    else:
+        return "No response from AI"
