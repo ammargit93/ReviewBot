@@ -11,7 +11,7 @@ import os
 
 
 from .prompt import SYSTEM_PROMPT
-from .tools import build_retriever_tool, search_web, spawn_container
+from .tools import build_retriever_tool, search_web
 
 load_dotenv()
 
@@ -36,7 +36,7 @@ def create_rag_agent(vector_store):
     agent = create_agent(
         model=model,
         checkpointer=memory,
-        tools=[retriever_tool, search_web, spawn_container],
+        tools=[retriever_tool, search_web],
         system_prompt=SYSTEM_PROMPT
     )
     return agent

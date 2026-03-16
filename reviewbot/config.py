@@ -1,5 +1,6 @@
 from pathlib import Path
 from langchain_huggingface import HuggingFaceEmbeddings
+import json
 
 # Base directory = project being indexed
 BASE_DIR = Path.cwd().resolve()
@@ -24,7 +25,6 @@ COLLECTION = BASE_DIR.name
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CHROMA_PATH.mkdir(parents=True, exist_ok=True)
 DB_DIR.mkdir(parents=True, exist_ok=True)
-SNAPSHOT_PATH.mkdir(parents=True, exist_ok=True)
 
 # Embedding model
 EMBEDDING_MODEL = HuggingFaceEmbeddings(
@@ -42,3 +42,19 @@ IGNORE_DIRS = {
     ".python-version",
     "uv.lock"
 }
+
+LAST_SESSION = None
+
+def load_config():
+    global LAST_SESSION
+    config_file = DATA_DIR / "config.json"
+    if not config_file.exists():
+        config_file.write_text(json.dumps({"last_session": None}, indent=4))
+    
+    try:
+        config_data = json.loads(config_file.read_text())
+        LAST_SESSION = config_data.get("last_session")
+    except Exception:
+        pass
+
+load_config()

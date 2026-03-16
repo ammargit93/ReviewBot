@@ -51,14 +51,3 @@ def build_retriever_tool(vector_store):
         return "\n\n".join(formatted)
 
     return search_codebase
-
-
-@tool
-def spawn_container(prompt: str):
-    """
-    Start a temporary Docker container for sandboxed code execution.
-    Returns the container ID.
-    """
-    manager = ContainerManager()
-    container = manager.start_container()
-    return {"container_id": container.id}

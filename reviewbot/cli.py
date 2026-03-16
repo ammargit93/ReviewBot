@@ -13,7 +13,11 @@ def build_parser():
     index_parser.set_defaults(func=index_files)
     
     # sessions command
-    sessions_parser = subparsers.add_parser("sessions",help="List all sessions in ReviewBot")
+    sessions_parser = subparsers.add_parser("sessions", help="Manage sessions: list / resume / delete")
+    sessions_group = sessions_parser.add_mutually_exclusive_group(required=True)
+    sessions_group.add_argument("--list", action="store_true", help="List all sessions")
+    sessions_group.add_argument("--delete", type=str, help="Delete a session by name")
+    sessions_group.add_argument("--resume", type=str, nargs="?", const="", help="Resume a session by name (uses last_session if omitted)")
     sessions_parser.set_defaults(func=list_sessions_command)
     
     # chat command
