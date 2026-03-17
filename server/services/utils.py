@@ -7,18 +7,19 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=300,
+    chunk_size=400,
+    chunk_overlap=60,
     separators=[
-        "\n\n",     # logical blocks
-        "\n",       # lines
-        "{",        # block start (C, Go, Java, JS)
-        "}",        # block end
-        ";",        # statement terminator
-        " ",        # words
-        ""          # fallback
+        "\n\n",  # logical blocks
+        "\n",    # lines
+        "{",     # code block start
+        "}",     # code block end
+        ";",     # statement end
+        " ",
+        ""
     ]
 )
+
 
 def document_splitter(documents: List[Document]):
     chunks = splitter.split_documents(documents)
@@ -30,6 +31,7 @@ def document_splitter(documents: List[Document]):
         file_path = chunk.metadata.get("path", "unknown")
         session = chunk.metadata.get("session")
         filename = Path(file_path).name
+
         chunk_id = str(uuid4())
 
         new_docs.append(
@@ -43,7 +45,8 @@ def document_splitter(documents: List[Document]):
                 },
                 id=chunk_id
             )
-        )        
+        )
+
         ids.append(chunk_id)
 
     return new_docs, ids

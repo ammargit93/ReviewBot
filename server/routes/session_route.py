@@ -1,16 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from server.models import Session
-
 router = APIRouter()
 
 @router.get("/session/list")
 async def list_sessions():
-    sessions = await Session.all()
+    sessions = await Session.all().values("session_name", "message_count")
     return {
         "sessions": [
             {
-                "session_name": s.session_name,
-                "message_count": s.message_count
+                "session_name": s["session_name"],
+                "message_count": s["message_count"]
             }
             for s in sessions
         ]

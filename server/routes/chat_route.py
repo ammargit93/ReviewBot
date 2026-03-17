@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException
 from server.models import Session, Message
-from server.agents.llm import generate_ai_response
+from server.agents.llm import generate_ai_response, create_rag_agent
 from langchain.messages import HumanMessage
 
 router = APIRouter()
@@ -19,6 +19,9 @@ async def chat_endpoint(request: Request):
 
     # get or create session
     session, _ = await Session.get_or_create(session_name=thread_id)
+
+    if not request.app.state.agent:
+        request.app.state.agent = create_rag_agent(request.app.state.vector_store, thread_id)
 
     # store user message
     await Message.create(

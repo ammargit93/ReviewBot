@@ -1,5 +1,5 @@
 from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 from tavily import TavilyClient
@@ -15,14 +15,14 @@ load_dotenv()
 client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
 model = ChatGroq(
-    model="llama-3.1-8b-instant",
+    model="qwen/qwen3-32b",
     temperature=0,
     max_tokens=1024,
     api_key=os.getenv("GROQ_API_KEY"),
 )
 
-def create_rag_agent(vector_store):
-    retriever_tool = build_retriever_tool(vector_store)
+def create_rag_agent(vector_store, session_name):
+    retriever_tool = build_retriever_tool(vector_store, session_name)
     agent = create_agent(
         model=model,
         tools=[retriever_tool, search_web],
@@ -41,10 +41,11 @@ async def generate_ai_response(agent, user_input: str, thread_id: str) -> str:
 
     response = agent.invoke(
         {"messages": [HumanMessage(content=user_input)]},
-        # config=config
+        config=config
     )
 
-    if response["messages"][-1].content:
-        return response["messages"][-1].content
-    else:
-        return "No response from AI"
+    for msg in reversed(response["messages"]):
+        if isinstance(msg, AIMessage) and msg.content:
+            return msg.content
+
+    return "No response from AI"

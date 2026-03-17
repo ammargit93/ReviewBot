@@ -20,9 +20,9 @@ async def lifespan(app: FastAPI):
         embedding_function=EMBEDDING_MODEL,
     )
 
-    agent = create_rag_agent(vector_store)
+    # agent = create_rag_agent(vector_store, session_name=None)
     app.state.vector_store = vector_store
-    app.state.agent = agent
+    app.state.agent = None
 
     print("ReviewBot server ready")
     yield

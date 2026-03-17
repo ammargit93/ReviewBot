@@ -1,5 +1,5 @@
 import httpx
-
+import time
 API_URL = "http://localhost:8000"
 
 
@@ -43,8 +43,7 @@ async def list_sessions_command(args):
         
         # update args to pass to chat_command
         args.name = session_name
-        await chat_command(args)
-    
+        await chat_command(args)    
 
 async def chat_command(args):
     session_name = getattr(args, 'name', None)
