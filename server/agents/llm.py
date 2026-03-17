@@ -35,7 +35,7 @@ def create_rag_agent(vector_store):
     retriever_tool = build_retriever_tool(vector_store)
     agent = create_agent(
         model=model,
-        checkpointer=memory,
+        # checkpointer=memory,
         tools=[retriever_tool, search_web],
         system_prompt=SYSTEM_PROMPT
     )
@@ -52,7 +52,7 @@ async def generate_ai_response(agent, user_input: str, thread_id: str) -> str:
 
     response = agent.invoke(
         {"messages": [HumanMessage(content=user_input)]},
-        config=config
+        # config=config
     )
 
     if response["messages"][-1].content:

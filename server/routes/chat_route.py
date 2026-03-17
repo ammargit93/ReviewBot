@@ -34,7 +34,7 @@ async def chat_endpoint(request: Request):
         security_agent = request.app.state.security_agent
         res = security_agent.invoke(
             {"messages": [HumanMessage(content=message)]},
-            config={"configurable": {"thread_id": thread_id}}
+            # config={"configurable": {"thread_id": thread_id}}
         )
         response = res["messages"][-1].content
     else:
