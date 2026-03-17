@@ -1,11 +1,8 @@
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.sqlite import SqliteSaver
-from langchain.agents.middleware import SummarizationMiddleware
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 from tavily import TavilyClient
-import sqlite3
 import re
 import os
 
@@ -24,18 +21,10 @@ model = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
 )
 
-conn = sqlite3.connect(
-    r"C:\Projects\Python-projects\ReviewBot\.reviewbot\database\memory.db",
-    check_same_thread=False
-)
-
-memory = SqliteSaver(conn=conn)
-
 def create_rag_agent(vector_store):
     retriever_tool = build_retriever_tool(vector_store)
     agent = create_agent(
         model=model,
-        # checkpointer=memory,
         tools=[retriever_tool, search_web],
         system_prompt=SYSTEM_PROMPT
     )

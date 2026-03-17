@@ -28,21 +28,11 @@ async def chat_endpoint(request: Request):
     )
     print(message)
 
-    multi_agent = body.get("multi_agent", False)
-
-    if multi_agent:
-        security_agent = request.app.state.security_agent
-        res = security_agent.invoke(
-            {"messages": [HumanMessage(content=message)]},
-            # config={"configurable": {"thread_id": thread_id}}
-        )
-        response = res["messages"][-1].content
-    else:
-        response = await generate_ai_response(
-            agent=request.app.state.agent,
-            user_input=message,
-            thread_id=thread_id,
-        )
+    response = await generate_ai_response(
+        agent=request.app.state.agent,
+        user_input=message,
+        thread_id=thread_id,
+    )
 
     # store AI message
     await Message.create(

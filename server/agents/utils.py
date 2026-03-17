@@ -1,5 +1,4 @@
 import re
-from server.container import ContainerManager
 from langchain.tools import tool
 
 SUPPORTED_TECH = {

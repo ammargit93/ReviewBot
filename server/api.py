@@ -6,8 +6,6 @@ from tortoise.contrib.fastapi import register_tortoise
 from reviewbot.config import COLLECTION, CHROMA_PATH, EMBEDDING_MODEL, DB_PATH
 
 from .agents.llm import create_rag_agent
-from .agents.security_agent import create_security_agent
-
 from .routes.session_route import router as session_router
 from .routes.index_route import router as index_router
 from .routes.chat_route import router as chat_router
@@ -23,11 +21,8 @@ async def lifespan(app: FastAPI):
     )
 
     agent = create_rag_agent(vector_store)
-    security_agent = create_security_agent(vector_store)
-
     app.state.vector_store = vector_store
     app.state.agent = agent
-    app.state.security_agent = security_agent
 
     print("ReviewBot server ready")
     yield

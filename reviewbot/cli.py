@@ -23,7 +23,6 @@ def build_parser():
     # chat command
     chat_parser = subparsers.add_parser("chat",help="Start interactive chat session")
     chat_parser.add_argument("--name",type=str,help="Create a new named session")
-    chat_parser.add_argument("--multi-agent", action="store_true", help="Deep review using multi-agentic inference")
     chat_parser.set_defaults(func=chat_command)
     
     return parser

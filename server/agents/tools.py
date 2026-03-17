@@ -11,7 +11,10 @@ client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 @tool
 def search_web(query: str):
     """Search the web for information."""
-    return client.search(query)
+    results = str(client.search(query))
+    if len(results) > 2000:
+        results = results[:2000] + "\n...[TRUNCATED]"
+    return results
 
 
 def build_retriever_tool(vector_store):
@@ -31,6 +34,8 @@ def build_retriever_tool(vector_store):
 
             if docs and docs["documents"]:
                 content = "\n\n".join(docs["documents"][:2])
+                if len(content) > 3000:
+                    content = content[:3000] + "\n...[TRUNCATED_TO_AVOID_TOKEN_LIMIT]"
 
                 return (
                     f"### Full file: {filename}\n"
@@ -42,10 +47,14 @@ def build_retriever_tool(vector_store):
         formatted = []
 
         for doc, score in results:
+            content = doc.page_content
+            if len(content) > 1000:
+                content = content[:1000] + "\n...[TRUNCATED_TO_AVOID_TOKEN_LIMIT]"
+                
             formatted.append(
                 f"### File: {doc.metadata.get('path')}\n"
                 f"Score: {score}\n"
-                f"```\n{doc.page_content}\n```"
+                f"```\n{content}\n```"
             )
 
         return "\n\n".join(formatted)

@@ -55,7 +55,7 @@ async def chat_command(args):
         else:
             print("Use --name to specify a session, or start a new named session first.")
             return
-    multi_agent = getattr(args, "multi_agent", False)
+    
     
     from reviewbot.config import DATA_DIR
     import json
@@ -71,11 +71,8 @@ async def chat_command(args):
     except Exception:
         pass
     
-    if multi_agent:
-        print(f"\n[Multi-Agent Mode Enabled]")
-    
     print(f"\nSession: {session_name}")
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=None) as client:
         while True:
             user_input = input("\nEnter : ")
             if user_input == "q":
@@ -84,8 +81,7 @@ async def chat_command(args):
                 f"{API_URL}/chat",
                 json={
                     "message": user_input,
-                    "thread_id": session_name,
-                    "multi_agent": bool(multi_agent)
+                    "thread_id": session_name
                 }
             )
             response.raise_for_status()
