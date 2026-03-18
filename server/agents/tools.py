@@ -1,8 +1,12 @@
 from langchain.tools import tool
 from tavily import TavilyClient
+from dotenv import load_dotenv
 import re
 import os
-from dotenv import load_dotenv
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Preformatted
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
 
 load_dotenv()
 
@@ -30,18 +34,12 @@ def build_retriever_tool(vector_store, session_name):
         Search the indexed codebase for relevant code snippets or files.
         Works across any programming language.
         """
-
         output = ""
-
-        # ---------- FILE LOOKUP ----------
         match = re.search(r"[\w./\\-]+\.[a-zA-Z0-9]+", query)
-
         if match:
             filename = match.group(0)
 
-            docs = vector_store.get(
-                where={"path": {"$contains": filename}}
-            )
+            docs = vector_store.get(where={"path": {"$contains": filename}})
 
             if docs and docs["documents"]:
                 content = docs["documents"][0]
@@ -99,10 +97,56 @@ def build_retriever_tool(vector_store, session_name):
 
             output = "\n\n".join(formatted)
 
-        # ---------- FINAL SAFETY TRUNCATION ----------
         if len(output) > MAX_TOOL_OUTPUT:
             output = output[:MAX_TOOL_OUTPUT] + "\n...[FINAL_TRUNCATION_TO_AVOID_TOKEN_LIMIT]"
 
         return output
 
     return search_codebase
+
+@tool
+def write_report(review: str) -> str:
+    """
+    Generate a structured PDF report from an AI code review.
+    """
+
+    file_path = "report.pdf"
+
+    styles = getSampleStyleSheet()
+    title = styles["Title"]
+    heading = styles["Heading2"]
+    body = styles["BodyText"]
+    code = styles["Code"]
+
+    elements = []
+
+    lines = review.split("\n")
+
+    for line in lines:
+
+        line = line.strip()
+
+        if not line:
+            elements.append(Spacer(1, 10))
+            continue
+
+        # Markdown-style headings
+        if line.startswith("###"):
+            elements.append(Paragraph(line.replace("###", "").strip(), heading))
+
+        # Code blocks
+        elif line.startswith("```"):
+            continue
+
+        # Bullet points
+        elif line.startswith("- "):
+            elements.append(Paragraph(f"• {line[2:]}", body))
+
+        # Normal text
+        else:
+            elements.append(Paragraph(line, body))
+
+    pdf = SimpleDocTemplate(file_path, pagesize=letter)
+    pdf.build(elements)
+
+    return f"Report written to {file_path}"

@@ -1,5 +1,6 @@
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage
+from langgraph.checkpoint.memory import InMemorySaver
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 from tavily import TavilyClient
@@ -8,7 +9,7 @@ import os
 
 
 from .prompt import SYSTEM_PROMPT
-from .tools import build_retriever_tool, search_web
+from .tools import build_retriever_tool, search_web, write_report
 
 load_dotenv()
 
@@ -25,8 +26,9 @@ def create_rag_agent(vector_store, session_name):
     retriever_tool = build_retriever_tool(vector_store, session_name)
     agent = create_agent(
         model=model,
-        tools=[retriever_tool, search_web],
-        system_prompt=SYSTEM_PROMPT
+        tools=[retriever_tool, search_web, write_report],
+        system_prompt=SYSTEM_PROMPT,
+        checkpointer=InMemorySaver()
     )
     return agent
 
