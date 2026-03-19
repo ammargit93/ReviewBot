@@ -10,6 +10,7 @@ def build_parser():
     index_parser = subparsers.add_parser("index", help="Index files for review")
     index_parser.add_argument("files", nargs="+", help="Files or directories to index")
     index_parser.add_argument("--name",type=str,required=True,help="Conversation name")
+    index_parser.add_argument("--incremental",action="store_true",help="Enable incremental indexing (only index new/changed files)")
     index_parser.set_defaults(func=index_files)
     
     # sessions command
@@ -17,7 +18,7 @@ def build_parser():
     sessions_group = sessions_parser.add_mutually_exclusive_group(required=True)
     sessions_group.add_argument("--list", action="store_true", help="List all sessions")
     sessions_group.add_argument("--delete", type=str, help="Delete a session by name")
-    sessions_group.add_argument("--resume", type=str, nargs="?", const="", help="Resume a session by name (uses last_session if omitted)")
+    sessions_group.add_argument("--resume", type=str, nargs="?", const="", help="Resume a session by name")
     sessions_parser.set_defaults(func=list_sessions_command)
     
     # chat command

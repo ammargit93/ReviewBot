@@ -10,6 +10,7 @@ async def index_files(request: Request):
         body = await request.json()
         paths = body.get("paths", [])
         session_name = body.get("session_name")
+        incremental = body.get("incremental", False)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON body")
 

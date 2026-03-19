@@ -3,14 +3,20 @@ import hashlib
 import time
 from pathlib import Path
 from uuid import uuid4
+import shutil
 
 from langchain_core.documents import Document
 from server.models import File, Session
 from .utils import document_splitter
-
+from reviewbot.config import SNAPSHOT_PATH
 
 MAX_CHUNKS_PER_FILE = 20   # prevents massive contexts
 
+
+def flush_snapshot():
+    snapshot_dir = Path(SNAPSHOT_PATH)
+    if snapshot_dir.exists():
+        shutil.rmtree(snapshot_dir)
 
 async def process_file(path_str, session, semaphore):
     async with semaphore:
@@ -53,13 +59,14 @@ async def process_file(path_str, session, semaphore):
 
         return document, file_data
 
+
+
 async def run_indexing(paths, session_name, vector_store):
     start = time.perf_counter()
 
     session, _ = await Session.get_or_create(session_name=session_name)
 
     semaphore = asyncio.Semaphore(10)
-
     tasks = [
         process_file(path, session, semaphore)
         for path in paths
@@ -96,7 +103,6 @@ async def run_indexing(paths, session_name, vector_store):
         )
 
     end = time.perf_counter()
-
     return {
         "indexed_files": len(documents),
         "time_taken_seconds": round(end - start, 4),

@@ -17,6 +17,7 @@ SNAPSHOT_PATH = DATA_DIR / "snapshots"
 # SQLite database
 DB_DIR = DATA_DIR / "database"
 DB_PATH = DB_DIR / "reviewbot.db"
+SNAPSHOT_PATH = DATA_DIR / "snapshots"
 
 # Collection name = project folder name
 COLLECTION = BASE_DIR.name
@@ -25,6 +26,7 @@ COLLECTION = BASE_DIR.name
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CHROMA_PATH.mkdir(parents=True, exist_ok=True)
 DB_DIR.mkdir(parents=True, exist_ok=True)
+SNAPSHOT_PATH.mkdir(parents=True, exist_ok=True)
 
 # Embedding model
 EMBEDDING_MODEL = HuggingFaceEmbeddings(

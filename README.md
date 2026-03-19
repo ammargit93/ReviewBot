@@ -5,41 +5,65 @@ ReviewBot is an intelligent code review assistant designed to help developers ma
 ## Features
 
 *   **Repository Indexing:** Indexes entire repositories by splitting files into chunks and generating embeddings for semantic search.
+*   **Incremental Indexing:** Efficiently updates the index by only processing new or changed files, saving time and resources.
 *   **RAG-based Code Understanding:** Uses retrieval-augmented generation (RAG) to answer questions about large codebases by retrieving relevant code chunks before generating responses.  
+*   **Security Auditing:** Analyzes code for security vulnerabilities, bugs, and inefficient implementations with a priority on safety.
 *   **Concurrent Processing:** Implements a concurrent indexing pipeline to process files in parallel, significantly improving repository indexing speed.
-*   **Session-Based Chat:** Supports session-based conversations with memory, allowing users to maintain context across multiple queries during repository exploration.
-*   **Semantic Code Search:** Uses ChromaDB vector storage to perform semantic search across indexed code chunks.
+*   **Session-Based Chat:** Supports persistent, session-based conversations with memory, allowing users to maintain context across multiple queries.
+*   **PDF Report Generation:** Generate structured PDF reports summarizing code reviews, security issues, and suggested improvements.
+*   **FastAPI Backend:** Powered by a FastAPI server for robust session management and asynchronous processing.
 
 ## Usage
 
-ReviewBot is primarily used via its command-line interface.
+ReviewBot is used via its command-line interface. For chat functionality, the backend server must be running.
 
-### Basic Usage
+### Starting the Server
 
-To get started, you can run ReviewBot with a simple command:
+Before using the chat or session features, start the FastAPI server:
 
 ```bash
-reviewbot --help
+uvicorn server.api:app --reload
 ```
 
-This will display the available commands and options.
+### Indexing a Repository
 
-### Example: Indexing a File
+Use the `index` command to prepare your codebase for review.
 
 ```bash
-reviewbot index <path/to/your/file.py> <path/to/your/file.py> --name <session-name>
+# Index specific files or directories
+reviewbot index <path/to/code> --name <session-name>
+
+# Incremental indexing (skips unchanged files)
+reviewbot index <path/to/code> --name <session-name> --incremental
 ```
 
-### Example: Indexing a Directory
+### Managing Sessions
+
+View and manage your review sessions:
 
 ```bash
-reviewbot index <path/to/your/dir/> <path/to/your/dir> --name <session-name> 
+# List all sessions
+reviewbot sessions --list
+
+# Delete a session
+reviewbot sessions --delete <session-name>
+
+# Resume a session
+reviewbot sessions --resume <session-name>
 ```
 
-### Example: Reviewing 
+### Chatting with ReviewBot
+
+Start an interactive terminal chat once the repository is indexed and the server is running.
 
 ```bash
-reviewbot chat --name <session-name> # starts a interactive terminal chat.
+# Start chat for a session
+reviewbot chat --name <session-name>
+```
+
+```bash
+# Continue previous chat session    
+reviewbot chat
 ```
 
 ## Development
@@ -52,14 +76,16 @@ reviewbot chat --name <session-name> # starts a interactive terminal chat.
     cd ReviewBot
     ```
 
-2.  **Create and activate a virtual environment:**
-    ```bash
-    uv init
-    ```
-
-3.  **Install development dependencies:**
+2.  **Install dependencies:**
+    ReviewBot uses `uv` for dependency management. Install dependencies and create a virtual environment:
     ```bash
     uv sync
+    ```
+
+3.  **Run ReviewBot:**
+    You can run the CLI directly using `uv run`:
+    ```bash
+    uv run -m reviewbot --help
     ```
 
 ## Architecture
@@ -82,9 +108,8 @@ reviewbot chat --name <session-name> # starts a interactive terminal chat.
 <img src="assets/benchmarks/after_concurrency.png" width="700">
 
 <!-- ## Next steps
-- avoid embedding recomputation on re-indexing of changed file(check with hashes).
-- diff management(only embed file diffs).
-- watchdog fastapi server.
-- on every file-save run the indexer dont run on whitespace/empty strs/newlines.
-- benchmark and optimise. (Optional)
-- HTML web ui connected to fastapi server running locally. (Optional) -->
+- [ ] Avoid embedding recomputation on re-indexing of changed file (check with hashes).
+- [ ] Diff management (only embed file diffs).
+- [ ] Watchdog FastAPI server integration for auto-indexing on file save.
+- [ ] Benchmark and optimize performance.
+- [ ] Implement a full HTML web UI connected to the FastAPI server. -->
