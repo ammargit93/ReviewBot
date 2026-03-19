@@ -53,7 +53,6 @@ async def process_file(path_str, session, semaphore):
 
         return document, file_data
 
-
 async def run_indexing(paths, session_name, vector_store):
     start = time.perf_counter()
 
@@ -77,11 +76,13 @@ async def run_indexing(paths, session_name, vector_store):
             documents.append(doc)
             files_to_create.append(file_data)
 
+
     if documents:
-
-        docs, split_ids = document_splitter(documents=documents)
-
-        # prevent indexing huge contexts
+        await asyncio.gather(*[
+            File.create(session=session, **file_data)
+            for file_data in files_to_create
+        ])
+        docs, split_ids = await document_splitter(documents=documents)
         if len(docs) > MAX_CHUNKS_PER_FILE:
             docs = docs[:MAX_CHUNKS_PER_FILE]
             split_ids = split_ids[:MAX_CHUNKS_PER_FILE]
@@ -93,11 +94,6 @@ async def run_indexing(paths, session_name, vector_store):
             documents=docs,
             ids=split_ids
         )
-
-        await asyncio.gather(*[
-            File.create(session=session, **file_data)
-            for file_data in files_to_create
-        ])
 
     end = time.perf_counter()
 

@@ -35,3 +35,14 @@ class Message(Model):
 
     def __str__(self):
         return f"Message(id={self.id}, type={self.message_type})"
+
+class Chunks(Model):
+    id = fields.IntField(primary_key=True)
+    chunk_content = fields.TextField()
+    chunk_index = fields.IntField(default=0)
+    chunk_embed_id = fields.CharField(max_length=36, null=True)
+    chunk_hash = fields.CharField(max_length=64)
+    file = fields.ForeignKeyField("models.File",related_name="chunks",on_delete=fields.CASCADE)  
+
+    def __str__(self):
+        return f"Chunks(id={self.id}, index={self.chunk_index}, file={self.file.file_path})"

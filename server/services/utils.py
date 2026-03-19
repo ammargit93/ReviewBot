@@ -1,10 +1,12 @@
 from typing import List
 from uuid import uuid4
 from pathlib import Path
+import hashlib
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from server.models import Chunks, File
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=400,
@@ -21,7 +23,7 @@ splitter = RecursiveCharacterTextSplitter(
 )
 
 
-def document_splitter(documents: List[Document]):
+async def document_splitter(documents: List[Document]):
     chunks = splitter.split_documents(documents)
 
     new_docs = []
@@ -48,5 +50,16 @@ def document_splitter(documents: List[Document]):
         )
 
         ids.append(chunk_id)
+
+        # safer DB lookup
+        file = await File.filter(file_path=file_path).first()
+        if file:
+            await Chunks.create(
+                chunk_content=chunk.page_content,
+                chunk_index=i,
+                chunk_embed_id=chunk_id,
+                chunk_hash=hashlib.sha1(chunk.page_content.encode()).hexdigest(),
+                file=file
+            )
 
     return new_docs, ids

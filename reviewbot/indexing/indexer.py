@@ -1,6 +1,8 @@
 import requests
 import time
 from reviewbot.utils import resolve_files
+from reviewbot.config import DATA_DIR
+import json
 
 IGNORE_DIRS = {".git", ".venv", "__pycache__", ".reviewbot", "node_modules"}
 
@@ -18,6 +20,7 @@ async def index_files(args):
         session_name = input("Session name: ").strip()
 
     file_paths = [str(p) for p in all_files]
+    
     try:
         response = requests.post(
             "http://127.0.0.1:8000/index",
@@ -36,6 +39,16 @@ async def index_files(args):
         return
 
     end = time.perf_counter()
+    
+    try:
+        config_file = DATA_DIR / "config.json"
+        data = {}
+        if config_file.exists():
+            data = json.loads(config_file.read_text())
+        data["last_session"] = session_name
+        config_file.write_text(json.dumps(data, indent=4))
+    except Exception:
+        print(f"Could not save last session")
 
     print("\nIndexing completed successfully.")
     print(f"Files indexed: {result.get('indexed_files', 0)}")
