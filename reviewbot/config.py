@@ -1,3 +1,6 @@
+import os
+os.environ["HF_TOKEN"] = ""
+
 from pathlib import Path
 from langchain_huggingface import HuggingFaceEmbeddings
 import json
@@ -30,7 +33,8 @@ SNAPSHOT_PATH.mkdir(parents=True, exist_ok=True)
 
 # Embedding model
 EMBEDDING_MODEL = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"token": False}
 )
 
 # Ignore directories during indexing

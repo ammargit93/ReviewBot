@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Data
+.reviewbot/
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Secrets
+.env
+
+# Project specific
+.python-version
+README.md
+Dockerfile
+.dockerignore
